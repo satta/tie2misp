@@ -130,14 +130,19 @@ class MISPAttribute(metaclass=ABCMeta):
         return val
 
     def upload_tags(self, misp, event):
-
         # Get Attribute UUID
         uuid = None
-        attr_list = event['Event']['Attribute']
+        attr_list = []
+        try:
+            attr_list = event['Event']['Attribute']
+        except KeyError:
+            # attr_list stays empty
+            pass
         if len(attr_list) > 0:
             for attr in attr_list:
-                if self.value in attr['value']:
-                    uuid = attr['uuid']
+                if 'value' in attr and self.value in attr['value']:
+                    if 'uuid' in attr:
+                        uuid = attr['uuid']
 
         # Upload all given attribute tags
         if len(self.tags) > 0 and uuid is not None:
